@@ -1,0 +1,74 @@
+﻿@page "/results"
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+
+<h3>Výsledky zápasů</h3>
+
+
+@if (matches == null || teams == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <tr>
+    
+     @foreach (var round in matches.GroupBy(i => i.Round).OrderBy(group => group.Key).ToList())
+     {
+        <h4 style=color:blue>@(round.FirstOrDefault().Round). kolo</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Domácí</th>
+                    <th>Hosté</th>
+                    <th>Datum</th>
+                    <th>Čas</th>
+                    <th>Round</th>
+                    <th> Výsledek</th>
+                </tr>
+    
+            </thead>
+   
+            <tbody>
+                @foreach (var m in round)
+                {
+                    <tr>
+                        <td>@teams.Where(t => t.ID == m.HomeTeamID).FirstOrDefault().Name</td>
+                        <td>@teams.Where(t => t.ID == m.HostTeamID).FirstOrDefault().Name</td>
+                        <td>@m.Date.Date.ToString("dd.MM.yyy")</td>
+                        <td>@m.Date.ToString("HH:mm")</td>
+                        <td> &nbsp @m.Round</td>
+                            @if(!m.Played || m.Result == null)
+                            {
+                                <td><a href="updateresult/@m.ID"  class="nav-link text-dark">Přidat výsledek </a></td>
+                            } else
+                            {
+                                <td> &nbsp&nbsp @m.Result.HomeTeamScore : @m.Result.HostTeamScore</td>
+                                
+                            }
+
+                      
+                    </tr>
+                }
+            </tbody>
+        </table>
+     }
+    
+        </tr>
+}
+
+@code {
+   
+    private List<Match> matches;
+    private List<Team> teams;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        matches = await Context.Matches.Include(m => m.Result).ToListAsync();
+        teams = await Context.Teams.ToListAsync();
+    }
+   
+}

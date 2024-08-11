@@ -1,0 +1,135 @@
+﻿@page "/team/{id:int}"
+
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+
+@if (team == null)
+{
+    <p><em>Loading...</em></p>
+}
+else 
+{
+    <h2>@team.Name</h2>
+    <hr>
+}
+<h2>Statistiky</h2>
+
+@if (statistic == null)
+{
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>Odehráno zápasů</th>
+                    <th>Body</th>
+                    <th>Vstřelené branky</th>
+                    <th>Obdržené branky</th>
+                    <th>Brankový rozdíl</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>
+                        0
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+}
+else
+{
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>Odehráno zápasů</th>
+                    <th>Body</th>
+                    <th>Vstřelené branky</th>
+                    <th>Obdržené branky</th>
+                    <th>Brankový rozdíl</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>@statistic.PlayedMatches</td>
+                    <td>@statistic.Points</td>
+                    <td>@statistic.GoalsScored</td>
+                    <td>@statistic.GoalsConceded</td>
+                    <td>
+                        @(statistic.GoalsScored - statistic.GoalsConceded)
+                    </td>
+                </tr>
+                
+            </tbody>
+        </table>
+}
+
+
+<h2>Hráči</h2>
+<p>
+    @*<a href="create" asp-route-id=id  class="nav-link text-dark">Create New</a>*@
+    <a href="create/@Id" class="nav-link text-dark"><span class="oi oi-plus" aria-hidden="true"></span> Nový hráč </a>
+</p>
+
+@if (players == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>Jméno</th>
+                    <th>Přijmení</th>
+                    <th>ID</th>
+                    <th>Team ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var p in players)
+                {
+                    <tr>
+                        <td>@p.FirstName</td>
+                        <td>@p.LastName</td>
+                        <td>@p.ID</td>
+                        <td>@p.TeamID</td>
+                        <td>
+                            <span @onclick="@(() => { OnDelete(p); })">Delete</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+}
+
+
+@code {
+    [Parameter]
+    public int Id {get; set;}
+
+    private Team team;
+    private List<Player> players;
+    private Statistic statistic;
+
+    public async Task OnDelete(Player deletedPlayer)
+    {
+        players.RemoveAt(players.ToList<Player>().FindIndex(e => e.ID == deletedPlayer.ID));
+        await Task.Run(() => Context.Players.Remove(deletedPlayer));
+        Context.SaveChanges();
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        players =  await Context.Players.Where(p => p.TeamID == Id).ToListAsync();
+        team = await  Context.Teams.FirstOrDefaultAsync(t => t.ID == Id);
+        statistic = await  Context.Statistics.FirstOrDefaultAsync(s => s.TeamID == Id);
+    }
+}

@@ -1,0 +1,45 @@
+﻿@page "/createteam"
+@using League.Data
+@using League.Models
+@inject NavigationManager NavManager
+
+@inject LeagueContext Context
+
+<h3>Nový tým</h3>
+
+<EditForm Model="@newTeam" OnValidSubmit="@InsertTeam">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    Název: <InputText id="teamName" @bind-Value="newTeam.Name"/>
+    <button type="submit" class="btn btn-primary">Uložit</button>
+</EditForm>
+
+
+@code {
+    private Team newTeam = new();
+  
+    private List<Team> teams;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        teams = await Context.Teams.ToListAsync();
+    }
+
+    private async Task InsertTeam() 
+    {
+        
+        Team t = new Team { Name= newTeam.Name};
+        
+        await  Context.Teams.AddAsync(t);
+        teams.Add(t);
+        await Context.SaveChangesAsync();
+        Statistic s = new Statistic {TeamID = t.ID};
+        await Context.Statistics.AddAsync(s);
+        await Context.SaveChangesAsync();
+        NavManager.NavigateTo($"/teams");
+
+    }
+
+}
+

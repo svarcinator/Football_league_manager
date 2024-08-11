@@ -1,0 +1,158 @@
+﻿@page "/newmatch"
+
+@using League.Data
+@using League.Models
+@inject NavigationManager NavManager
+
+@inject LeagueContext Context
+
+<h3>Nový zápas</h3>
+
+@if (teams == null)  
+{  
+    <p><em>Loading...</em></p>  
+}  
+else  
+{  
+    <EditForm Model="@timestring" OnValidSubmit="@TimeRoundValid">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+         <div class="row" style="padding-top:10px">  
+        <div class="col-md-4">  
+            <p>
+                <label asp-for="Domácí" class="control-label">Domácí</label>
+            <select class="form-control" onchange="@HomeTeamClicked">  
+                <option value="">-- Select Team --</option>  
+                @foreach (var team in teams)  
+                {  
+                    <option value="@team.ID">@team.Name</option>  
+                }  
+            </select>  
+            </p>
+            
+        </div> 
+        </div>  
+
+        <div class="row" style="padding-top:10px">  
+        <div class="col-md-4">  
+            <p>
+                <label asp-for="Hosté" class="control-label">Hosté</label>
+            <select class="form-control" onchange="@HostTeamClicked">  
+                <option value="">-- Select Team --</option>  
+                @foreach (var team in teams)  
+                {  
+                    <option value="@team.ID">@team.Name</option>  
+                }  
+            </select>  
+            </p>
+            
+        </div> 
+        </div>  
+         
+        <div class="row" style="padding-top:10px"> 
+             <div class="col-md-4"> 
+                <p>
+                    <label asp-for="Hosté" class="control-label">Datum</label> <br>
+                    <input type="date" format-value="yyyy-MM-dd" onchange="@DateChange">
+                </p>
+        </div> 
+        </div>
+
+        <p>
+            <label class="control-label">Čas</label> <br>
+            <InputText id="time" @bind-Value="timestring.TimeString" />
+            
+        </p>
+        
+        <br>
+        <p>
+            <label  class="control-label">Kolo</label><br>
+            <InputText id="round" @bind-Value="timestring.RoundString"/>
+        </p>
+        
+    </EditForm>
+
+    <br>
+    <button type="submit" @onclick="InsertMatch" class="btn btn-primary">Uložit</button>
+}
+  
+
+@code {
+
+    private List<Team> teams;
+    public Match NewMatch = new();
+    private DateTime date;
+    public TimeParser timestring = new();
+
+    protected void DateChange(ChangeEventArgs o)
+    {
+        date = DateTime.Parse(o.Value.ToString());
+        
+        if (timestring.TimeString != null)
+        {
+            DateTime result;
+            DateTime.TryParse(date.ToShortDateString() + timestring.TimeString, out result);
+            Console.WriteLine(date);
+            NewMatch.Date = result;
+        }
+
+    }
+
+    protected override async void OnInitialized()
+    {
+        teams = await Context.Teams.ToListAsync();
+    }
+    
+
+    protected void HomeTeamClicked(ChangeEventArgs o)  
+    {  
+        
+        int teamID;
+        var success = Int32.TryParse(o.Value.ToString(), out teamID);
+        if (success)
+        {
+            NewMatch.HomeTeamID = teamID;
+        }
+    }  
+
+    protected void HostTeamClicked(ChangeEventArgs o)  
+    {  
+       
+        int teamID;
+        var success = Int32.TryParse(o.Value.ToString(), out teamID);
+        if (success)
+        {
+            NewMatch.HostTeamID = teamID;
+        }
+        
+    }
+
+    public void TimeRoundValid()
+    {
+        int round;
+        Int32.TryParse(timestring.RoundString, out round);
+        NewMatch.Round = round;
+        if (date != null)
+        {
+            DateTime result;
+            string astr = date.ToShortDateString() + " " +  timestring.TimeString;
+            DateTime.TryParse(astr, out result);
+            NewMatch.Date = result;
+        }
+    }
+
+    public async Task InsertMatch()
+    {
+        TimeRoundValid();
+        
+        if (NewMatch.HomeTeamID != 0 && NewMatch.HostTeamID!= 0 && NewMatch.Date!= null && NewMatch.Round!= 0)
+        {
+            await Task.Run(() => Context.Matches.Add(NewMatch));
+            Context.SaveChanges();
+            NavManager.NavigateTo($"/schedule");
+        }
+        
+    }
+
+}

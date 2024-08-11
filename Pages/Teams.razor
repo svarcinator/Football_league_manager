@@ -1,0 +1,86 @@
+﻿@page "/teams"
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+
+<h3>Týmy</h3>
+
+<p>
+
+    <NavLink class="nav-link text-dark" href="createteam">
+       <span class="oi oi-plus" aria-hidden="true"></span> Nový tým
+    </NavLink>
+
+</p>
+
+@if (teams == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>Název</th>
+                    <th>Team ID</th>
+                   
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var t in teams)
+                {
+                    <tr>
+                        @*<td> <NavLink class="nav-link text-dark" href=@t.Link> @t.Name </NavLink></td>*@
+                        <td><a href="team/@t.ID" ID="@t.ID" class="nav-link text-dark"> @t.Name </a></td>
+                        <td>@t.ID</td>
+                        <td>
+                            <span @onclick="@(async () => { await OnDelete(t); })">Delete</span>
+                        </td>
+                        
+                        
+                    </tr>
+                }
+            </tbody>
+        </table>
+    @if(DeleteError == true)
+    {
+        <div class="alert alert-danger" style="margin-left: 50px">@message</div>
+
+    }
+}
+
+@code {
+    private List<Team> teams;
+    private bool DeleteError = false;
+    private string message;
+
+    public async Task OnDelete(Team deletedTeam)
+    {
+        message = "Tým již odehrál zápasy a nemůže být smazán.";
+        var stats = await Task.Run( () => Context.Statistics.ToList());
+        Console.WriteLine($"{deletedTeam.ID}  ");
+        
+        if (stats.Where(s => s.ID == deletedTeam.ID && s.PlayedMatches != 0).Any())
+        {
+            DeleteError = true;
+            await InvokeAsync(() => StateHasChanged()); 
+            await Task.Delay(5000);
+            DeleteError = false;
+            return;
+        }
+        teams.RemoveAt(teams.ToList<Team>().FindIndex(e => e.ID == deletedTeam.ID));
+        var matches = await Task.Run( () => Context.Matches.ToList());
+        await Task.Run(() => Context.Teams.Remove(deletedTeam)); 
+        await Task.Run(() => Context.Statistics.Remove(stats.FirstOrDefault(s => s.TeamID == deletedTeam.ID)));
+        await Task.Run(() => Context.Matches.RemoveRange(matches.Where(m => m.HomeTeamID == deletedTeam.ID || m.HostTeamID == deletedTeam.ID)));
+        await Context.SaveChangesAsync();
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        teams = await Context.Teams.ToListAsync();
+    }
+}

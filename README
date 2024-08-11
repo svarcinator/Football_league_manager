@@ -1,0 +1,9 @@
+Aplikace umožňuje:
+
+    Výpis týmů a jednotlivých hráčů  -- Na stránce Týmy kliknutím na tým přejdeme na stránku zobrazující jednotlivé hráče a statistiku daného týmu
+    Výpis statistik jednotlivých týmů
+    Přidat a smazat tým, hráče -- tým můžeme smazat pouze pokud ještě neodehrál žádný zápas
+    Importovat seznam týmů do prázdné databáze -- pokud je databáze plná, stránka zahlási alert, že nelze importovat více týmů, ocekavany format je seznam tymů oddělený řádky (příklad Teams.csv)
+    Přidat a smazat temíny zápasů -- Na stránce Rozpis zápasů, zápas který byl již odehrán nelze smazat, stránka termíny zápasů zobrazuje pouze zápasy, které ještě nebyly odehrány
+    Přidat výsledky jednotlivých zápasů -- Na stránce Výsledky zápasů (stránka zobrazuje vsechny zápasy odehrane i neodehrane, neodehranym zapasum lze prida skore)
+    Zobrazení tabulky a její export do CSV -- nazev souboru je table.csv

@@ -1,0 +1,76 @@
+﻿@page "/updateresult/{id:int}"
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+@inject NavigationManager NavManager
+
+
+<h3>Výsledek zápasu</h3>
+@if (homeTeam == null || hostTeam == null)
+{
+    <p><em>Loading...</em></p>
+} else
+{
+    <EditForm Model="@result" OnValidSubmit="@InsertResult">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+      @homeTeam.Name <br><InputText id="homeScore" @bind-Value="result.HomeTeamScore"/>
+    <br>
+      <br>
+    
+    @hostTeam.Name <br><InputText id="hostScore" @bind-Value="result.HostTeamScore"/> <br>
+      <br>
+    <button type="submit" class="btn btn-primary">Uložit</button>
+    </EditForm>
+}
+
+
+
+@code {
+    [Parameter]
+    public int Id {get; set;}
+    public Team homeTeam;
+    public Team hostTeam;
+    public Match match;
+    public MatchResult result = new();
+
+        protected override async Task OnInitializedAsync()
+    {
+        match = await  Context.Matches.FirstOrDefaultAsync(t => t.ID == Id);
+
+        homeTeam= await Context.Teams.FirstOrDefaultAsync(t => t.ID == match.HomeTeamID);
+        hostTeam= await  Context.Teams.FirstOrDefaultAsync(t => t.ID == match.HostTeamID);
+    }
+    private async Task UpdateStatistic( int id, int conceded, int scored)
+    {
+        var statistic = await Task.Run(() => Context.Statistics.FirstOrDefault(s => s.TeamID == id));
+        statistic.GoalsConceded += conceded;
+        statistic.GoalsScored += scored;
+        statistic.PlayedMatches += 1;
+        if (conceded == scored)
+        {
+            statistic.Points += 1;
+        } else if (conceded < scored)
+        {
+            statistic.Points += 3;
+        }
+        await Context.SaveChangesAsync();
+    }
+     private async Task InsertResult() 
+    {
+        Int32.TryParse(result.HomeTeamScore, out int home);
+        Int32.TryParse(result.HostTeamScore, out int host);
+        
+        await UpdateStatistic( homeTeam.ID, host, home);
+        await UpdateStatistic( hostTeam.ID, home, host);
+        
+        match.Result = result;
+        match.Played = true;
+        await Context.SaveChangesAsync();
+        NavManager.NavigateTo($"/results");
+    }
+
+}

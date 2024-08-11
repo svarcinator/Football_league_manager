@@ -1,0 +1,78 @@
+﻿@page "/schedule"
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+
+<h3>Rozpis zápasů</h3>
+
+<p>
+    
+    <a href="newmatch" class="nav-link text-dark"><span class="oi oi-plus" aria-hidden="true"></span> Nový zápas </a>
+</p>
+
+@if (matches2 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <tr>
+    
+     @foreach (var round in matches2.Where(match => !match.Played).GroupBy(i => i.Round).OrderBy(group => group.Key).ToList())
+     {
+        <h4 style=color:blue>@(round.FirstOrDefault().Round). kolo</h4>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Domácí</th>
+                    <th>Hosté</th>
+                    <th>Datum</th>
+                    <th>Čas</th>
+                    <th>Round</th>
+                </tr>
+    
+            </thead>
+   
+            <tbody>
+                @foreach (var m in round.Where(match => !match.Played))
+                {
+                    <tr>
+                        <td>@teams.Where(t => t.ID == m.HomeTeamID).FirstOrDefault().Name</td>
+                        <td>@teams.Where(t => t.ID == m.HostTeamID).FirstOrDefault().Name</td>
+                        <td>@m.Date.Date.ToString("dd.MM.yyy")</td>
+                        <td>@m.Date.ToString("HH:mm")</td>
+                        <td>@m.Round</td>
+                        <td>
+                            <span @onclick="@(async() => { await OnDelete(m); })">Delete</span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+     }
+    
+        </tr>
+}
+
+@code {
+    private List<Match> matches2;
+    private List<Team> teams;
+   
+
+    public async Task OnDelete(Match deletedMatch)
+    {
+        
+        await Task.Run(() => Context.Matches.Remove(deletedMatch));
+        await Context.SaveChangesAsync();
+        matches2 = matches2.Where(m => m.ID != deletedMatch.ID).ToList();
+       
+    }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        matches2 = await  Context.Matches.ToListAsync();
+        teams = await  Context.Teams.ToListAsync();
+    }
+}

@@ -1,0 +1,82 @@
+﻿@page "/table"
+@using League.Data
+@using League.Models
+
+@using Microsoft.AspNetCore.Mvc
+@using System.Text
+
+@inject LeagueContext Context
+
+
+<h3>Tabulka</h3>
+
+
+@if (statistics == null || teams == null) 
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+            <thead>
+                <tr>
+                    <th>Pozice</th>
+                    <th>Název</th>
+                    <th>Zápasy</th>
+                    <th>Body</th>
+                    <th>Vstřelené branky</th>
+                    <th>Obdržené branky</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < statistics.Count(); ++i)
+                {
+                    <tr>
+                        <td>@(i + 1).</td>
+                        <td><a href="team/@teams.FirstOrDefault(t => t.ID == statistics[i].TeamID).ID" class="nav-link text-dark"> @teams.FirstOrDefault(t => t.ID == statistics[i].TeamID).Name </a></td>
+                        <td>@statistics[i].PlayedMatches</td>
+                        <td>@statistics[i].Points</td>
+                        <td>@statistics[i].GoalsScored</td>
+                        <td>@statistics[i].GoalsConceded</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if(teams.Any())
+        {
+            <span @onclick="@(async() => { await ExportCSV(); })">Export do CSV</span>
+        }
+        
+}
+
+
+@code {
+    private List<Team> teams;
+    private List<Statistic> statistics;
+
+    private Task ExportCSV() => Task.Run( async () => 
+    {
+        StringBuilder sb = new StringBuilder();
+        var path = Path.Combine(System.IO.Directory.GetCurrentDirectory(), "table.csv");
+        sb.AppendLine("Position,Name,PlayedMatches,Points,GoalsScored,GoalsConceded");
+        
+        for (int i = 0; i < statistics.Count; ++i )
+        {
+            sb.AppendLine($"{i+1},{teams.FirstOrDefault(t => t.ID == statistics[i].TeamID).Name},{statistics[i].PlayedMatches}, {statistics[i].Points},{statistics[i].GoalsScored}, {statistics[i].GoalsConceded}");
+        }
+        using (StreamWriter outputFile = new StreamWriter(path))
+        {
+            await outputFile.WriteAsync(sb.ToString());
+        }
+    } );
+    
+  
+    protected override async Task OnInitializedAsync()
+    {
+        var tasks = new List<Task>();        
+        teams = await Context.Teams.ToListAsync();
+        statistics = await Context.Statistics.OrderByDescending(stat => stat.Points).ThenByDescending(stat => stat.GoalsScored - stat.GoalsConceded).ToListAsync();
+
+    }
+
+}

@@ -1,0 +1,125 @@
+﻿@page "/"
+@using System;
+@using System.Text;
+@using League.Data
+@using League.Models
+@inject LeagueContext Context
+
+<PageTitle>Index</PageTitle>
+
+<h3>Manažer fotbalovové ligy</h3>
+
+Vítejte ve webové aplikaci spravující fotbalovou ligu. <br>
+<hr>
+<b>Aplikace umožňuje:</b>
+<ol>
+    <li type=disc>Výpis týmů a jednotlivých hráčů</li>
+    <li type=disc>Výpis statistik jednotlivých týmů</li>
+    <li type=disc>Přidat a smazat tým, hráče</li>
+    <li type=disc>Importovat seznam týmů do prázdné databáze</li>
+    <li type=disc>Přidat a smazat temíny zápasů</li>
+    <li type=disc>Přidat výsledky jednotlivýchzápasů</li>
+    <li type=disc>Zobrazení tabulky a její export do CSV</li>
+</ol>
+
+<br>
+<hr>
+<h4>Import týmů</h4>
+Vložte seznam týmů:
+<br>
+
+<div class="row col-12" >
+    <div class="col-4">
+        <InputFile OnChange="@OnInputFileChanged"></InputFile>
+
+    </div>
+
+    <div>
+        @if(DBError == true)
+        {
+            <br>
+            <div class="alert alert-danger" style="margin-left: 50px">@message</div>
+
+        } else if (DBok == true)
+        {
+            <br>
+            <div class="alert alert-success" style="margin-left: 50px">@message</div>
+        }
+    </div>
+
+</div>
+
+@code 
+{
+    private bool DBError = false; // flag that turns error allert on
+    private bool DBok = false;  // flag that turns green allert on
+    private string message = "";
+
+    private async Task ShowMessage( bool error, string txt)
+    {
+            message = txt;
+            if (error)
+            {
+                DBError = true;
+            } else {
+                DBok = true;
+            }
+            
+            await InvokeAsync(() => StateHasChanged()); 
+            await Task.Delay(5000);
+            //default states for both DBError and DBok
+            DBError = false;
+            DBok = false;
+    }
+
+    private async Task UpdateDB(string text)
+    {
+        List<Team> teams = new List<Team>();
+        using (StringReader sr = new StringReader(text)) {
+        string line;
+        while (( line = (await sr.ReadLineAsync())) != null) 
+        {
+            teams.Add(new Team{Name=line});    
+        }
+        Context.Teams.AddRange(teams);
+        await Context.SaveChangesAsync();
+
+        List<Statistic> statistics = new List<Statistic>();
+        foreach(var t in Context.Teams)
+        {
+            statistics.Add(new Statistic {TeamID = t.ID});
+        }
+        Context.Statistics.AddRange(statistics);
+        await Context.SaveChangesAsync();
+
+    }
+
+    }
+    private async Task OnInputFileChanged(InputFileChangeEventArgs inputFileChanged)
+    {
+        if (Context.Teams.Any())
+        {
+            await ShowMessage(true, "Databáze již obsahuje týmy."); 
+           
+        } else
+        {
+            var tasks = new List<Task>();
+            
+            // get gile
+            var file = inputFileChanged.File;
+            var buffer = new byte[file.Size];
+            
+            tasks.Add(Task.Run(() => file.OpenReadStream().ReadAsync(buffer)));
+            tasks.Add(ShowMessage(false, "Týmy nahrány do databáze"));
+            await Task.WhenAll(tasks.ToArray());
+            string str = Encoding.Default.GetString(buffer);
+            await UpdateDB(str);
+            Console.WriteLine(str);
+        }
+        
+
+    }
+}
+
+
+

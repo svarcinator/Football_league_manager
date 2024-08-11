@@ -1,0 +1,77 @@
+{
+  "Files": [
+    {
+      "Id": "/home/ter/c#/Liga_projekt/obj/Debug/net6.0/scopedcss/projectbundle/db_test.bundle.scp.css",
+      "PackagePath": "staticwebassets/db_test.bundle.scp.css"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/bootstrap/bootstrap.min.css",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "PackagePath": "staticwebassets/css/bootstrap/bootstrap.min.css.map"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/FONT-LICENSE",
+      "PackagePath": "staticwebassets/css/open-iconic"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/ICON-LICENSE",
+      "PackagePath": "staticwebassets/css/open-iconic"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/README.md",
+      "PackagePath": "staticwebassets/css/open-iconic/README.md"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/css/open-iconic-bootstrap.min.css",
+      "PackagePath": "staticwebassets/css/open-iconic/font/css/open-iconic-bootstrap.min.css"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/fonts/open-iconic.eot",
+      "PackagePath": "staticwebassets/css/open-iconic/font/fonts/open-iconic.eot"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/fonts/open-iconic.otf",
+      "PackagePath": "staticwebassets/css/open-iconic/font/fonts/open-iconic.otf"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/fonts/open-iconic.svg",
+      "PackagePath": "staticwebassets/css/open-iconic/font/fonts/open-iconic.svg"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/fonts/open-iconic.ttf",
+      "PackagePath": "staticwebassets/css/open-iconic/font/fonts/open-iconic.ttf"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/open-iconic/font/fonts/open-iconic.woff",
+      "PackagePath": "staticwebassets/css/open-iconic/font/fonts/open-iconic.woff"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/css/site.css",
+      "PackagePath": "staticwebassets/css/site.css"
+    },
+    {
+      "Id": "/home/ter/c#/Liga_projekt/wwwroot/favicon.ico",
+      "PackagePath": "staticwebassets/favicon.ico"
+    },
+    {
+      "Id": "obj/Debug/net6.0/staticwebassets/msbuild.build.db_test.props",
+      "PackagePath": "build\\db_test.props"
+    },
+    {
+      "Id": "obj/Debug/net6.0/staticwebassets/msbuild.buildMultiTargeting.db_test.props",
+      "PackagePath": "buildMultiTargeting\\db_test.props"
+    },
+    {
+      "Id": "obj/Debug/net6.0/staticwebassets/msbuild.buildTransitive.db_test.props",
+      "PackagePath": "buildTransitive\\db_test.props"
+    },
+    {
+      "Id": "obj/Debug/net6.0/staticwebassets/msbuild.db_test.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

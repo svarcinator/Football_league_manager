@@ -1,0 +1,50 @@
+﻿@page "/create/{id:int}"
+
+@inject NavigationManager NavManager
+
+@using League.Data
+@using League.Models
+
+@inject LeagueContext Context
+
+<h3>Nový hráč</h3>
+
+<EditForm Model="@newPlayer" OnValidSubmit="@InsertPerson">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+      Jméno:&nbsp&nbsp&nbsp <InputText id="firstName" @bind-Value="newPlayer.FirstName"/>
+    <br>
+    
+    Přijmení: <InputText id="lastName" @bind-Value="newPlayer.LastName"/>
+    &nbsp<button type="submit" class="btn btn-primary">Uložit</button>
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int Id {get; set;}
+    private List<Player> players;
+    private Player newPlayer = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine($"Id {Id}");
+        players = await Task.Run( () => Context.Players.Where(p => p.TeamID == Id).ToList());
+    }
+
+    private async Task InsertPerson() 
+    {
+        
+        newPlayer.TeamID = Id;
+        Player p = new Player { FirstName = newPlayer.FirstName, LastName = newPlayer.LastName, TeamID = Id};
+        await Task.Run(() => Context.Players.Add(p));
+        
+        players.Add(p);
+        //Context.Players.AddRange(players);
+        Context.SaveChanges();
+        NavManager.NavigateTo($"/team/{p.TeamID}");
+
+    }
+
+}
